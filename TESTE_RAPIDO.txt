@@ -1,0 +1,62 @@
+⚡ TESTE RÁPIDO - 5 MINUTOS
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ CHECKLIST RÁPIDO:
+
+1️⃣ Abra App em http://localhost:3000/
+   └─ Deve carregar sem erros ✓
+
+2️⃣ Pressione F12 > Console
+   └─ Procure erros vermelhos ✓
+
+3️⃣ Vá para "Checklist & Execução"
+   └─ Clique "+ Nova Tarefa" ✓
+
+4️⃣ Preencha:
+   └─ ID: TEST-001
+   └─ Atividade: Teste Firebase
+   └─ Fase: A
+   └─ Salvar ✓
+
+5️⃣ Verifique se apareceu na lista
+   └─ Deve estar lá ✓
+
+6️⃣ Abra Firebase Console
+   └─ https://console.firebase.google.com/
+   └─ Firestore Database > tasks collection ✓
+
+7️⃣ Procure documento TEST-001
+   └─ Deve estar lá com seus dados ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✨ RESULTADO:
+
+✅ Se tudo apareceu → **FIREBASE FUNCIONANDO!** 🎉
+❌ Se teve erro → Leia TESTE_FIREBASE.md (guia completo)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 PRÓXIMO:
+
+Teste 2 abas abertas (real-time):
+  1. Abra app em 2 abas diferentes
+  2. Marque tarefa como concluída na aba 1
+  3. Veja se atualiza na aba 2 automaticamente
+  
+  ✅ Se sim → Real-time sync funcionando!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📚 Guias Disponíveis:
+
+Teste Rápido (5 min):
+  → TESTE_FIREBASE.md
+
+Teste Completo (15 min):
+  → Mesma página, mais testes
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Bom teste! 🚀
