@@ -1,23 +1,45 @@
 {
   "name": "lucro-real-planner",
+  "description": "Sistema de Planejamento para Micro Empreendedores",
+  "author": "Seu Nome",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
+  "main": "electron/main.js",
+  "homepage": "./",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:exe": "npm run build && electron-builder --win --publish=never",
     "preview": "vite preview"
   },
+  "build": {
+    "appId": "com.lucroreal.planner",
+    "productName": "Lucro Real Planner",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ]
+    }
+  },
   "dependencies": {
+    "firebase": "^11.2.0",
+    "lucide-react": "^0.563.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "recharts": "^3.7.0",
-    "lucide-react": "^0.563.0",
-    "firebase": "^11.2.0"
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0",
+    "electron-is-dev": "^3.0.1",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

@@ -1,11 +1,12 @@
 import React from 'react';
-import { Download, AlertCircle, X } from 'lucide-react';
+import { Download, AlertCircle, X, ExternalLink } from 'lucide-react';
 
 interface UpdateModalProps {
   isOpen: boolean;
   version: string;
   changes: string[];
   isUpdating: boolean;
+  downloadUrl?: string;
   onUpdate: () => void;
   onClose: () => void;
 }
@@ -15,6 +16,7 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
   version,
   changes,
   isUpdating,
+  downloadUrl,
   onUpdate,
   onClose,
 }) => {
@@ -61,6 +63,15 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
           <p className="text-xs text-slate-500 mb-6">
             Clique em "Atualizar Agora" para instalar a nova versão.
           </p>
+
+          {downloadUrl && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
+              <p className="text-xs text-blue-700 flex items-center gap-2">
+                <ExternalLink size={14} />
+                <span>Download automático disponível no GitHub</span>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Footer */}

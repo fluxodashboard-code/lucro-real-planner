@@ -1,9 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
+import { getLatestVersionFromGithub, compareVersions, UpdateInfoFromGithub } from '../services/githubService';
 
-interface UpdateInfo {
-  version: string;
-  releaseDate: string;
-  changes: string[];
+interface UpdateInfo extends UpdateInfoFromGithub {
+  downloadUrl?: string;
 }
 
 export const useUpdater = () => {
@@ -14,6 +13,10 @@ export const useUpdater = () => {
 
   // Versão atual (mesmo do package.json)
   const currentVersion = '0.0.2';
+  
+  // Configuração do GitHub (você pode usar variáveis de ambiente)
+  const GITHUB_OWNER = import.meta.env.VITE_GITHUB_OWNER || 'seu-usuario';
+  const GITHUB_REPO = import.meta.env.VITE_GITHUB_REPO || 'lucro-real-planner';
 
   // Função para verificar atualizações
   const checkForUpdates = useCallback(async () => {
@@ -21,52 +24,82 @@ export const useUpdater = () => {
     setError(null);
 
     try {
-      // Tenta buscar o arquivo de versão do servidor/storage
-      // Se houver uma URL remota configurada, usa ela. Caso contrário, usa o caminho local.
-      const updateUrl = import.meta.env.VITE_UPDATE_URL
-        ? `${import.meta.env.VITE_UPDATE_URL.replace(/\/$/, '')}/version.json`
-        : '/version.json';
+      let updateData: UpdateInfo | null = null;
+      let errorOccurred = false;
 
-      const response = await fetch(updateUrl, {
-        cache: 'no-store'
-      });
-
-      if (!response.ok) {
-        throw new Error('Falha ao verificar versão');
+      // Tenta buscar do GitHub primeiro
+      try {
+        const githubData = await getLatestVersionFromGithub(GITHUB_OWNER, GITHUB_REPO);
+        if (githubData) {
+          updateData = githubData as UpdateInfo;
+        }
+      } catch (githubError) {
+        console.warn('Erro ao buscar do GitHub, tentando URL customizada:', githubError);
+        errorOccurred = true;
       }
 
-      const data = await response.json() as UpdateInfo;
+      // Se GitHub falhou ou não retornou dados, tenta URL alternativa
+      if (!updateData) {
+        try {
+          const updateUrl = import.meta.env.VITE_UPDATE_URL
+            ? `${import.meta.env.VITE_UPDATE_URL.replace(/\/$/, '')}/version.json`
+            : '/version.json';
 
-      // Compara versões (formato semântico)
-      const isNewer = compareVersions(data.version, currentVersion) > 0;
+          const response = await fetch(updateUrl, {
+            cache: 'no-store'
+          });
 
-      if (isNewer) {
-        setUpdateAvailable(true);
-        setUpdateInfo(data);
-      } else {
-        setUpdateAvailable(false);
-        setUpdateInfo(null);
+          if (response.ok) {
+            updateData = await response.json() as UpdateInfo;
+          }
+        } catch (fallbackError) {
+          console.warn('Erro ao buscar versão de URL alternativa:', fallbackError);
+        }
+      }
+
+      // Se conseguiu dados, verifica versão
+      if (updateData) {
+        const isNewer = compareVersions(updateData.version, currentVersion) > 0;
+
+        if (isNewer) {
+          setUpdateAvailable(true);
+          setUpdateInfo(updateData);
+        } else {
+          setUpdateAvailable(false);
+          setUpdateInfo(null);
+        }
+      } else if (errorOccurred) {
+        setError('Não foi possível verificar atualizações');
       }
     } catch (err) {
       console.warn('Erro ao verificar atualizações:', err);
-      // Não mostra erro ao usuário - é apenas um check em background
-      setError(null);
+      setError(null); // Não mostra erro ao usuário - é apenas um check em background
     } finally {
       setIsChecking(false);
     }
-  }, [currentVersion]);
+  }, [currentVersion, GITHUB_OWNER, GITHUB_REPO]);
 
   // Função para fazer update
   const performUpdate = useCallback(async () => {
     try {
       setIsChecking(true);
 
-      // Se for Electron
-      if (window.electronAPI?.updateApp) {
+      // Se tem URL de download (do GitHub), oferece para o usuário fazer download
+      if (updateInfo?.downloadUrl) {
+        // Abre o navegador para fazer download
+        window.open(updateInfo.downloadUrl, '_blank');
+        
+        // Se for Electron, pode auto-atualizar depois
+        if (window.electronAPI?.updateApp) {
+          setTimeout(() => {
+            window.electronAPI?.updateApp?.();
+          }, 1000);
+        }
+      } else if (window.electronAPI?.updateApp) {
+        // Se for Electron e não tem URL, usa API do electron
         await window.electronAPI.updateApp();
       } else {
         // Caso contrário, faz hard refresh
-        // Limpa cache e recarrega
         caches.keys().then(names => {
           names.forEach(name => caches.delete(name));
         });
@@ -81,11 +114,14 @@ export const useUpdater = () => {
     } finally {
       setIsChecking(false);
     }
-  }, []);
+  }, [updateInfo?.downloadUrl]);
 
-  // Check automático a cada 5 minutos
+  // Check automático ao abrir e a cada 5 minutos
   useEffect(() => {
+    // Verifica imediatamente ao abrir o app
     checkForUpdates();
+    
+    // Depois verifica a cada 5 minutos
     const interval = setInterval(checkForUpdates, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [checkForUpdates]);
@@ -98,10 +134,11 @@ export const useUpdater = () => {
     error,
     checkForUpdates,
     performUpdate,
+    githubUrl: `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}`,
   };
 };
 
-// Função auxiliar para comparar versões semânticas
+// Função auxiliar para comparar versões semânticas (mantida para compatibilidade)
 function compareVersions(version1: string, version2: string): number {
   const parts1 = version1.split('.').map(Number);
   const parts2 = version2.split('.').map(Number);

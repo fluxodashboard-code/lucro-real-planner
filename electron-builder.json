@@ -1,0 +1,15 @@
+{
+  "appId": "com.lucroreal.planner",
+  "productName": "Lucro Real Planner",
+  "files": [
+    "dist/**/*",
+    "electron/**/*",
+    "node_modules/**/*"
+  ],
+  "win": {
+    "target": [
+      "portable"
+    ],
+    "artifactName": "${productName}.exe"
+  }
+}

@@ -130,6 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isOpen, setIsOp
           version={updateInfo?.version || ''}
           changes={updateInfo?.changes || []}
           isUpdating={isChecking}
+          downloadUrl={updateInfo?.downloadUrl}
           onUpdate={handleUpdate}
           onClose={() => setShowUpdateModal(false)}
         />
