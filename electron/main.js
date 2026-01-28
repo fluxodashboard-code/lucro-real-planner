@@ -1,4 +1,5 @@
-import { app, BrowserWindow, Menu } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain } from 'electron';
+import { autoUpdater } from 'electron-updater';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -9,6 +10,38 @@ const __dirname = path.dirname(__filename);
 const isDev = __dirname.includes('node_modules') || process.env.NODE_ENV === 'development';
 
 let mainWindow;
+
+// Configurar auto-updater
+autoUpdater.autoDownload = true; // Baixa automaticamente
+autoUpdater.autoInstallOnAppQuit = true; // Instala ao fechar app
+
+// Logs do auto-updater
+autoUpdater.on('checking-for-update', () => {
+  console.log('Verificando atualizações...');
+});
+
+autoUpdater.on('update-available', (info) => {
+  console.log('Atualização disponível:', info.version);
+  mainWindow?.webContents.send('update-available', info);
+});
+
+autoUpdater.on('update-not-available', (info) => {
+  console.log('Você está na versão mais recente:', info.version);
+});
+
+autoUpdater.on('error', (err) => {
+  console.error('Erro ao verificar atualizações:', err);
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  console.log(`Baixando: ${progressObj.percent.toFixed(1)}%`);
+  mainWindow?.webContents.send('download-progress', progressObj.percent);
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+  console.log('Atualização baixada! Será instalada ao fechar o app.');
+  mainWindow?.webContents.send('update-downloaded', info);
+});
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -41,7 +74,31 @@ function createWindow() {
   if (isDev) {
     mainWindow.webContents.openDevTools();
   }
+
+  // Verificar atualizações após 3 segundos (dar tempo do app carregar)
+  if (!isDev) {
+    setTimeout(() => {
+      autoUpdater.checkForUpdatesAndNotify();
+    }, 3000);
+
+    // Verificar atualizações a cada 10 minutos
+    setInterval(() => {
+      autoUpdater.checkForUpdatesAndNotify();
+    }, 10 * 60 * 1000);
+  }
 }
+
+// IPC para verificar atualizações manualmente
+ipcMain.on('check-for-updates', () => {
+  if (!isDev) {
+    autoUpdater.checkForUpdatesAndNotify();
+  }
+});
+
+// IPC para instalar atualização imediatamente
+ipcMain.on('install-update', () => {
+  autoUpdater.quitAndInstall(false, true);
+});
 
 app.on('ready', createWindow);
 

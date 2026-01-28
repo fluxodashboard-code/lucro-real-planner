@@ -5,6 +5,7 @@ import Checklist from './components/Checklist';
 import Docs from './components/Docs';
 import ProjectSettings from './components/ProjectSettings';
 import Report from './components/Report';
+import AutoUpdateNotification from './components/AutoUpdateNotification';
 import { ViewState, Task, ProjectSettings as IProjectSettings } from './types';
 import { INITIAL_RESPONSIBLES } from './constants';
 import { useFirebaseTasks } from './hooks/useFirebaseTasks';
@@ -184,6 +185,9 @@ const App: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Notificação automática de atualização */}
+      <AutoUpdateNotification />
     </div>
   );
 };
