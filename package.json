@@ -9,23 +9,10 @@
   "homepage": "./",
   "scripts": {
     "dev": "vite",
+    "dev:electron": "NODE_ENV=development electron .",
     "build": "vite build",
-    "build:exe": "npm run build && electron-builder --win --publish=never",
+    "build:exe": "npm run build && npx electron-builder --win --publish=never",
     "preview": "vite preview"
-  },
-  "build": {
-    "appId": "com.lucroreal.planner",
-    "productName": "Lucro Real Planner",
-    "files": [
-      "dist/**/*",
-      "electron/**/*",
-      "node_modules/**/*"
-    ],
-    "win": {
-      "target": [
-        "portable"
-      ]
-    }
   },
   "dependencies": {
     "firebase": "^11.2.0",
@@ -35,11 +22,14 @@
     "recharts": "^3.7.0"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.23",
     "electron": "^40.0.0",
     "electron-builder": "^26.4.0",
-    "electron-is-dev": "^3.0.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

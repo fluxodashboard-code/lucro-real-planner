@@ -9,6 +9,14 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
       },
+      build: {
+        outDir: 'dist',
+        emptyOutDir: true,
+        sourcemap: false,
+      },
+      css: {
+        postcss: './postcss.config.js',
+      },
       plugins: [react()],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
