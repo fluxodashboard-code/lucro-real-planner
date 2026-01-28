@@ -1,8 +1,9 @@
 {
-  "version": "0.0.4",
+  "version": "0.0.5",
   "releaseDate": "2026-01-28",
   "changes": [
-    "Sidebar: Configuração no final",
-    "Sincronização automática de versão"
+    "Auto-update automático implementado",
+    "Notificação com progresso em tempo real",
+    "Instalação com zero fricção"
   ]
 }

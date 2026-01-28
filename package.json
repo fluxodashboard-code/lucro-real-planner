@@ -3,7 +3,7 @@
   "description": "Sistema de Planejamento para Micro Empreendedores",
   "author": "Seu Nome",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "main": "electron/main.js",
   "homepage": "./",
