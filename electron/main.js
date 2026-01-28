@@ -16,7 +16,7 @@ let mainWindow;
 
 // Configurar auto-updater
 autoUpdater.autoDownload = true; // Baixa automaticamente
-autoUpdater.autoInstallOnAppQuit = true; // Instala ao fechar app
+autoUpdater.autoInstallOnAppQuit = false; // Permitir instalação manual via botão
 
 // Logs do auto-updater
 autoUpdater.on('checking-for-update', () => {

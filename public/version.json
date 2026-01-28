@@ -1,8 +1,8 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "releaseDate": "2026-01-28",
   "changes": [
-    "✅ Modais elegantes substituindo alert() e confirm() padrão do navegador",
+    "✅ Auto-update automático com notificação para reinstalar",
     "✅ IDs customizados agora são salvos diretamente no Firebase (A-01, B-02, etc)",
     "✅ Validação de IDs duplicados com feedback visual",
     "✅ Exclusão de tarefas funcionando perfeitamente no front-end",
