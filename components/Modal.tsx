@@ -38,8 +38,8 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, type = 'in
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${animate ? 'opacity-100' : 'opacity-0'}`}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
-      <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 ${animate ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'} overflow-hidden`}>
-        <div className="flex items-center justify-between p-4 border-b border-slate-100">
+      <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col transform transition-all duration-300 ${animate ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'} overflow-hidden`}>
+        <div className="flex items-center justify-between p-4 border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center gap-3">
             {getIcon()}
             <h3 className="text-lg font-bold text-slate-800">{title}</h3>
@@ -49,12 +49,12 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, type = 'in
           </button>
         </div>
         
-        <div className="p-6 text-slate-600">
+        <div className="p-6 text-slate-600 overflow-y-auto flex-1">
           {children}
         </div>
 
         {footer && (
-          <div className="bg-slate-50 p-4 flex justify-end gap-3 border-t border-slate-100">
+          <div className="bg-slate-50 p-4 flex justify-end gap-3 border-t border-slate-100 flex-shrink-0">
             {footer}
           </div>
         )}

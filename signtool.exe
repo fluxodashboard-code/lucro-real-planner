@@ -1,0 +1,3 @@
+@echo off
+REM Fake signtool - retorna sucesso imediatamente
+exit /b 0

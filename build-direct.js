@@ -1,11 +1,16 @@
-{
+import * as builder from 'electron-builder';
+
+// Desabilitar completamente o signing
+process.env.CSC_IDENTITY_AUTO_DISCOVERY = 'false';
+process.env.WIN_CSC_LINK = '';
+process.env.CSC_LINK = '';
+
+const config = {
   "appId": "com.lucroreal.planner",
   "productName": "Lucro Real Planner",
   "copyright": "Copyright © 2026 Lucro Real",
   "asar": true,
-  "asarUnpack": [
-    "**/*.node"
-  ],
+  "asarUnpack": ["**/*.node"],
   "files": [
     "dist/**/*",
     "electron/**/*",
@@ -23,15 +28,15 @@
     "buildResources": "assets"
   },
   "win": {
-    "target": [
-      {
-        "target": "nsis",
-        "arch": ["x64"]
-      }
-    ],
+    "target": [{
+      "target": "nsis",
+      "arch": ["x64"]
+    }],
     "artifactName": "${productName} Setup ${version}.exe",
     "verifyUpdateCodeSignature": false,
-    "requestedExecutionLevel": "asInvoker"
+    "requestedExecutionLevel": "asInvoker",
+    "sign": null,
+    "signingHashAlgorithms": []
   },
   "nsis": {
     "oneClick": false,
@@ -54,4 +59,16 @@
     "owner": "fluxodashboard-code",
     "repo": "lucro-real-planner"
   }
-}
+};
+
+builder.build({
+  config: config,
+  targets: builder.Platform.windows.createTarget(['nsis'], builder.Arch.x64),
+  publish: 'never'
+}).then(() => {
+  console.log('✓ Build completed successfully');
+  process.exit(0);
+}).catch(err => {
+  console.error('✗ Build failed:', err);
+  process.exit(1);
+});
