@@ -79,9 +79,9 @@ const App: React.FC = () => {
     setConfirmModal({ isOpen: true, action: 'reset' });
   };
 
-  const confirmReset = () => {
+  const confirmReset = async () => {
     localStorage.removeItem(STORAGE_KEY);
-    setResponsibles(INITIAL_RESPONSIBLES);
+    await saveResponsibles(INITIAL_RESPONSIBLES);
     setSettings(DEFAULT_SETTINGS);
     window.location.reload();
   };
