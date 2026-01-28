@@ -31,7 +31,11 @@ export default defineConfig(({ mode }) => {
         }
       },
       optimizeDeps: {
-        include: ['firebase']
+        esbuildOptions: {
+          define: {
+            global: 'globalThis'
+          }
+        }
       },
       css: {
         postcss: './postcss.config.js',

@@ -10,6 +10,7 @@ import { ConfirmModal, AlertModal } from './components/Modal';
 import { ViewState, Task, ProjectSettings as IProjectSettings } from './types';
 import { INITIAL_RESPONSIBLES } from './constants';
 import { useFirebaseTasks } from './hooks/useFirebaseTasks';
+import { useFirebaseResponsibles } from './hooks/useFirebaseResponsibles';
 
 const STORAGE_KEY = 'lr_planner_state_v1';
 
@@ -31,16 +32,9 @@ const App: React.FC = () => {
 
   // Firebase Hooks
   const { tasks, addTask, updateTask, deleteTask, loading: tasksLoading } = useFirebaseTasks('default_user');
+  const { responsibles, saveResponsibles, loading: responsiblesLoading } = useFirebaseResponsibles('default_user');
 
-  // Initialize State from LocalStorage or Defaults (Only for Responsibles and Settings)
-  const [responsibles, setResponsibles] = useState<string[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try { return JSON.parse(saved).responsibles; } catch (e) { return INITIAL_RESPONSIBLES; }
-    }
-    return INITIAL_RESPONSIBLES;
-  });
-
+  // Initialize State from LocalStorage or Defaults (Only for Settings)
   const [settings, setSettings] = useState<IProjectSettings>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -49,12 +43,11 @@ const App: React.FC = () => {
     return DEFAULT_SETTINGS;
   });
 
-  // Persistence Effect (Only for Responsibles and Settings)
+  // Persistence Effect (Only for Settings, responsibles are now in Firebase)
   useEffect(() => {
-    // We don't save tasks to localStorage anymore
-    const stateToSave = { responsibles, settings };
+    const stateToSave = { settings };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
-  }, [responsibles, settings]);
+  }, [settings]);
 
   // Handlers
   const toggleTask = (id: string) => {
@@ -69,10 +62,17 @@ const App: React.FC = () => {
   const handleUpdateTask = (updatedTask: Task) => updateTask(updatedTask);
   const handleDeleteTask = (taskId: string) => deleteTask(taskId);
 
-  const handleAddResponsible = (name: string) => {
-    if (!responsibles.includes(name)) setResponsibles(prev => [...prev, name].sort());
+  const handleAddResponsible = async (name: string) => {
+    if (!responsibles.includes(name)) {
+      const newList = [...responsibles, name].sort();
+      await saveResponsibles(newList);
+    }
   };
-  const handleDeleteResponsible = (name: string) => setResponsibles(prev => prev.filter(r => r !== name));
+  
+  const handleDeleteResponsible = async (name: string) => {
+    const newList = responsibles.filter(r => r !== name);
+    await saveResponsibles(newList);
+  };
 
   // Settings Handlers
   const handleReset = () => {
