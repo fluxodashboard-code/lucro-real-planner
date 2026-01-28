@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, ipcMain } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain, shell } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
@@ -73,19 +73,45 @@ function createWindow() {
 
   mainWindow.loadURL(startUrl);
 
+  // Abrir links externos no navegador padrão (Chrome, Firefox, etc)
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
+  // Interceptar navegação para abrir links externos no navegador
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    // Permitir navegação interna do app
+    if (url.startsWith('file://') || url.startsWith('http://localhost')) {
+      return;
+    }
+    // Abrir links externos no navegador
+    event.preventDefault();
+    shell.openExternal(url);
+  });
+
   // Abrir DevTools em modo desenvolvimento para debug
   if (isDev) {
     mainWindow.webContents.openDevTools();
   }
 
-  // Verificar atualizações após 3 segundos (dar tempo do app carregar)
+  // Configurar auto-updater para GitHub
   if (!isDev) {
+    autoUpdater.setFeedURL({
+      provider: 'github',
+      owner: 'fluxodashboard-code',
+      repo: 'lucro-real-planner'
+    });
+
+    // Verificar atualizações após 3 segundos (dar tempo do app carregar)
     setTimeout(() => {
+      console.log('Verificando atualizações...');
       autoUpdater.checkForUpdatesAndNotify();
     }, 3000);
 
     // Verificar atualizações a cada 10 minutos
     setInterval(() => {
+      console.log('Verificando atualizações (intervalo)...');
       autoUpdater.checkForUpdatesAndNotify();
     }, 10 * 60 * 1000);
   }

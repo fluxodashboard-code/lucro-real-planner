@@ -1,9 +1,7 @@
 {
-  "version": "0.0.7",
+  "version": "0.0.8",
   "releaseDate": "2026-01-28",
   "changes": [
-    "Salvamento de projetos no Firebase",
-    "Lista de projetos com editar/excluir",
-    "Modal de salvamento melhorado"
+    "Atualização de versão"
   ]
 }
