@@ -84,7 +84,7 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
     setEditingProjectId(project.id);
     setProjectName(project.name);
     setSettings(project.settings);
-    setShowSaveModal(true);
+    setAlertModal({ isOpen: true, message: `Projeto "${project.name}" carregado! Faça as alterações e clique em "Salvar no Banco".`, type: 'info', title: 'Editar Projeto' });
   };
 
   const handleDeleteProject = (projectId: string, projectName: string) => {
@@ -259,11 +259,6 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
                 placeholder="Ex: ERP utilizado, início no Lucro Real, peculiaridades, riscos..."
                 className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
               />
-            </div>
-            
-            <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
-                <Save size={14} />
-                Salvamento automático ativo (localStorage).
             </div>
           </div>
         </div>
