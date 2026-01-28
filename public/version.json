@@ -1,7 +1,8 @@
 {
-  "version": "0.0.3",
+  "version": "0.0.4",
   "releaseDate": "2026-01-28",
   "changes": [
-    "Versão inicial"
+    "Sidebar: Configuração no final",
+    "Sincronização automática de versão"
   ]
 }

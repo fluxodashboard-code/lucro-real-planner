@@ -16,13 +16,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isOpen, setIsOp
   const { currentVersion, isChecking, updateAvailable, updateInfo, checkForUpdates, performUpdate } = useUpdater();
 
   const menuItems: { id: ViewState; label: string; icon: React.ReactNode }[] = [
-    { id: 'settings', label: 'Configuração', icon: <Settings size={20} /> },
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { id: 'checklist', label: 'Checklist & Execução', icon: <CheckSquare size={20} /> },
     { id: 'report', label: 'Relatório', icon: <ClipboardList size={20} /> },
     { id: 'phases', label: 'Fases do Projeto', icon: <Layers size={20} /> },
     { id: 'models', label: 'Modelos & Docs', icon: <FileText size={20} /> },
     { id: 'tips', label: 'Dicas Técnicas', icon: <Lightbulb size={20} /> },
+    { id: 'settings', label: 'Configuração', icon: <Settings size={20} /> },
   ];
 
   const handleRefresh = () => {
