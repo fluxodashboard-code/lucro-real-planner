@@ -122,27 +122,41 @@ git push origin v0.0.5
 
 ### **Etapa 7: Criar Release no GitHub (COM EXE)**
 
+#### **Opção A: Automático via GitHub CLI (Recomendado)** ⚡
+
+```powershell
+gh release create v0.0.5 "dist\Lucro Real Planner Setup 0.0.5.exe" `
+  --title "v0.0.5 - Dashboard Redesenhado" `
+  --notes "## Novidades v0.0.5
+
+### ✨ Novas Funcionalidades
+- Dashboard completamente redesenhado
+- Novo tema escuro disponível
+
+### 🚀 Melhorias
+- Performance +50% mais rápido
+- Carregamento de gráficos otimizado
+
+### 🐛 Correções
+- Corrigido bug ao editar configurações
+- Sincronização de dados melhorada
+
+### 📦 Instalação
+1. Baixe o arquivo \`Lucro Real Planner Setup 0.0.5.exe\`
+2. Execute o instalador
+3. Siga as instruções na tela"
+```
+
+**Pronto!** ✅ Release criado e EXE anexado automaticamente.
+
+#### **Opção B: Manual via Interface Web**
+
 1. Acesse: https://github.com/fluxodashboard-code/lucro-real-planner/releases
 2. Clique: **"Create a new release"**
 3. Preencha:
    - **Tag version**: `v0.0.5`
    - **Release title**: `v0.0.5 - Dashboard Redesenhado`
-   - **Description**:
-     ```markdown
-     ## Novidades v0.0.5
-
-     ### ✨ Novas Funcionalidades
-     - Dashboard completamente redesenhado
-     - Novo tema escuro disponível
-
-     ### 🚀 Melhorias
-     - Performance +50% mais rápido
-     - Carregamento de gráficos otimizado
-
-     ### 🐛 Correções
-     - Corrigido bug ao editar configurações
-     - Sincronização de dados melhorada
-     ```
+   - **Description**: (copie as notas acima)
 
 4. **Fazer Upload do EXE**:
    - Clique: **"Attach binaries..."**
@@ -151,15 +165,36 @@ git push origin v0.0.5
 
 ---
 
-## 🎯 Resumo do Comando Único (Opcional)
+## 🎯 Fluxo Completo Automatizado
 
-Se quiser fazer **tudo em uma sequência** (sem aguardar):
+Para fazer **TUDO automaticamente** (versão → build → git → release):
 
 ```powershell
-node scripts/update-version.js 0.0.5 "Nova feature"; npm run build; npm run build:exe; git add .; git commit -m "v0.0.5: Nova feature"; git push origin main; git tag -a v0.0.5 -m "v0.0.5: Nova feature"; git push origin v0.0.5
+# 1. Atualizar versão
+node scripts/update-version.js 0.0.5 "Dashboard redesenhado"
+
+# 2. Build React + EXE
+npm run build
+npm run build:exe
+
+# 3. Git commit + push + tag
+git add .
+git commit -m "v0.0.5: Dashboard redesenhado"
+git push origin main
+git tag -a v0.0.5 -m "v0.0.5: Dashboard redesenhado"
+git push origin v0.0.5
+
+# 4. Criar release com EXE automaticamente
+gh release create v0.0.5 "dist\Lucro Real Planner Setup 0.0.5.exe" `
+  --title "v0.0.5 - Dashboard Redesenhado" `
+  --notes "## Novidades
+
+- Dashboard completamente redesenhado
+- Performance melhorada
+- Bugs corrigidos"
 ```
 
-> ⚠️ Use com cuidado - se der erro em alguma etapa, pode ficar em estado inconsistente.
+**Pronto!** 🎉 Release público em ~10-15 minutos.
 
 ---
 
@@ -203,12 +238,12 @@ Lucro Real Planner Setup 0.0.5.exe ✅
 ### Problema: "Ainda aparece versão antiga"
 **Solução:**
 1. Verifique se `update-version.js` foi executado
-2. Verifique 3 arquivos:
-   - `package.json` (version)
-   - `public/version.json` (version)
-   - `metadata.json` (version)
-3. Limpe cache: `rm -r dist`
-4. Refaça: `npm run build`
+2. Verifique 3 arquivos: Link Release |
+|--------|------|--------------------|--------------| 
+| 0.0.4 | 28/01/2026 | Sidebar: Configuração no final | [v0.0.4](https://github.com/fluxodashboard-code/lucro-real-planner/releases/tag/v0.0.4) |
+| 0.0.3 | 28/01/2026 | Sincronização automática de versão | [v0.0.3](https://github.com/fluxodashboard-code/lucro-real-planner/releases/tag/v0.0.3) |
+| 0.0.2 | - | - | - |
+| 0.0.1 | -ça: `npm run build`
 
 ### Problema: "EXE com versão errada"
 **Solução:**
