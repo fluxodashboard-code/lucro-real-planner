@@ -1,7 +1,9 @@
 {
-  "version": "0.0.6",
+  "version": "0.0.7",
   "releaseDate": "2026-01-28",
   "changes": [
-    "Correção: electron-updater funcionando"
+    "Salvamento de projetos no Firebase",
+    "Lista de projetos com editar/excluir",
+    "Modal de salvamento melhorado"
   ]
 }

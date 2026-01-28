@@ -19,7 +19,6 @@
       "nsis"
     ],
     "artifactName": "${productName} Setup ${version}.exe",
-    "publisherName": "Lucro Real",
     "verifyUpdateCodeSignature": false,
     "requestedExecutionLevel": "asInvoker"
   },

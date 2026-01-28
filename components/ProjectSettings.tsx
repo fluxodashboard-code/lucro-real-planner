@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { ProjectSettings as IProjectSettings, Task } from '../types';
-import { Download, Upload, RotateCcw, Save, Building2, MapPin, FileText } from 'lucide-react';
+import { Download, Upload, RotateCcw, Save, Building2, MapPin, FileText, Database, Edit2, Trash2, Check, X } from 'lucide-react';
+import { useFirebaseProjects } from '../hooks/useFirebaseProjects';
 
 interface ProjectSettingsProps {
   settings: IProjectSettings;
@@ -18,6 +19,11 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
   taskCount, completedCount, responsibleCount
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [projectName, setProjectName] = useState('');
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  
+  const { projects, loading, saveProject, updateProject, deleteProject } = useFirebaseProjects('default_user');
 
   const handleChange = (section: keyof IProjectSettings | null, field: string, value: string) => {
     if (section === 'empresaOperacional' || section === 'empresaServices') {
@@ -36,12 +42,103 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
     }
   };
 
+  const handleSaveToDatabase = async () => {
+    if (!projectName.trim()) {
+      alert('Digite um nome para o projeto!');
+      return;
+    }
+
+    if (editingProjectId) {
+      const result = await updateProject(editingProjectId, projectName, settings);
+      if (result.success) {
+        alert('Projeto atualizado com sucesso!');
+        setShowSaveModal(false);
+        setProjectName('');
+        setEditingProjectId(null);
+      } else {
+        alert('Erro ao atualizar projeto. Tente novamente.');
+      }
+    } else {
+      const result = await saveProject(projectName, settings);
+      if (result.success) {
+        alert('Projeto salvo no banco de dados!');
+        setShowSaveModal(false);
+        setProjectName('');
+      } else {
+        alert('Erro ao salvar projeto. Tente novamente.');
+      }
+    }
+  };
+
+  const handleLoadProject = (project: any) => {
+    setSettings(project.settings);
+    alert(`Projeto "${project.name}" carregado!`);
+  };
+
+  const handleEditProject = (project: any) => {
+    setEditingProjectId(project.id);
+    setProjectName(project.name);
+    setSettings(project.settings);
+    setShowSaveModal(true);
+  };
+
+  const handleDeleteProject = async (projectId: string, projectName: string) => {
+    if (confirm(`Tem certeza que deseja excluir o projeto "${projectName}"?`)) {
+      const result = await deleteProject(projectId);
+      if (result.success) {
+        alert('Projeto excluído com sucesso!');
+      } else {
+        alert('Erro ao excluir projeto. Tente novamente.');
+      }
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <header>
         <h2 className="text-2xl font-bold text-slate-800">Configuração do Projeto</h2>
         <p className="text-slate-500">Perfil das empresas, salvamento automático e importação/exportação.</p>
       </header>
+
+      {/* Modal de Salvar */}
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">
+              {editingProjectId ? 'Atualizar Projeto' : 'Salvar Projeto no Banco'}
+            </h3>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Nome do Projeto</label>
+            <input 
+              type="text"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="Ex: Projeto Cliente ABC"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 mb-4"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button 
+                onClick={handleSaveToDatabase}
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                <Check size={16} />
+                {editingProjectId ? 'Atualizar' : 'Salvar'}
+              </button>
+              <button 
+                onClick={() => {
+                  setShowSaveModal(false);
+                  setProjectName('');
+                  setEditingProjectId(null);
+                }}
+                className="flex-1 flex items-center justify-center gap-2 bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                <X size={16} />
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form Column */}
@@ -163,6 +260,14 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
 
             <div className="space-y-3">
               <button 
+                onClick={() => setShowSaveModal(true)}
+                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                <Database size={18} />
+                Salvar no Banco
+              </button>
+
+              <button 
                 onClick={onExport}
                 className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
@@ -206,6 +311,64 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
                     <div className="flex justify-between">
                         <span className="text-slate-600">Concluídas</span>
                         <span className="font-medium text-slate-900">{completedCount}</span>
+
+          {/* Projetos Salvos */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <div className="flex items-center gap-2 mb-4 text-green-600">
+              <Database size={20} />
+              <h3 className="font-bold text-lg">Projetos Salvos</h3>
+            </div>
+            
+            {loading ? (
+              <p className="text-sm text-slate-400">Carregando projetos...</p>
+            ) : projects.length === 0 ? (
+              <p className="text-sm text-slate-400">Nenhum projeto salvo ainda.</p>
+            ) : (
+              <div className="space-y-2">
+                {projects.map((project) => (
+                  <div 
+                    key={project.id}
+                    className="bg-slate-50 p-3 rounded-lg border border-slate-200 hover:border-blue-300 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-slate-800 text-sm">{project.name}</h4>
+                        <p className="text-xs text-slate-500 mt-1">
+                          {project.settings.empresaOperacional.nome || 'Sem empresa'}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          {new Date(project.updatedAt).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => handleLoadProject(project)}
+                          className="p-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded transition-colors"
+                          title="Carregar"
+                        >
+                          <Download size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleEditProject(project)}
+                          className="p-1.5 bg-amber-100 hover:bg-amber-200 text-amber-600 rounded transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProject(project.id, project.name)}
+                          className="p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-slate-600">Responsáveis</span>
