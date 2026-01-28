@@ -1,6 +1,7 @@
 {
   "appId": "com.lucroreal.planner",
   "productName": "Lucro Real Planner",
+  "copyright": "Copyright © 2026 Lucro Real",
   "asar": true,
   "asarUnpack": [
     "**/*.node"
@@ -17,7 +18,10 @@
     "target": [
       "nsis"
     ],
-    "artifactName": "${productName} Setup ${version}.exe"
+    "artifactName": "${productName} Setup ${version}.exe",
+    "publisherName": "Lucro Real",
+    "verifyUpdateCodeSignature": false,
+    "requestedExecutionLevel": "asInvoker"
   },
   "nsis": {
     "oneClick": false,
@@ -25,7 +29,14 @@
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "shortcutName": "Lucro Real Planner",
-    "differentialPackage": true
+    "displayLanguageSelector": false,
+    "installerLanguages": ["pt_BR"],
+    "language": "1046",
+    "deleteAppDataOnUninstall": false,
+    "runAfterFinish": true,
+    "menuCategory": true,
+    "allowElevation": true,
+    "warningsAsErrors": false
   },
   "publish": {
     "provider": "github",
