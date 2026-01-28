@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Task } from '../types';
 import { CheckSquare, Square, User, AlertTriangle, Plus, Edit2, Trash2, X, Save, Users, Search, Calendar, Link as LinkIcon, FileText, Filter } from 'lucide-react';
+import { ConfirmModal, AlertModal } from './Modal';
 
 interface ChecklistProps {
   tasks: Task[];
@@ -31,6 +32,10 @@ const Checklist: React.FC<ChecklistProps> = ({
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [formData, setFormData] = useState<Partial<Task>>({});
   const [newResponsible, setNewResponsible] = useState('');
+  
+  // Confirm/Alert Modal State
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, taskId?: string}>({ isOpen: false });
+  const [alertModal, setAlertModal] = useState<{isOpen: boolean, message: string, type: 'success' | 'error' | 'warning' | 'info', title: string}>({ isOpen: false, message: '', type: 'info', title: '' });
 
   // Filter State
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,28 +72,44 @@ const Checklist: React.FC<ChecklistProps> = ({
     setFormData({});
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.id || !formData.activity || !formData.phase) {
-      alert("Por favor, preencha ID, Atividade e Fase.");
+      setAlertModal({ isOpen: true, message: 'Por favor, preencha ID, Atividade e Fase.', type: 'warning', title: 'Campos obrigatórios' });
       return;
     }
     const taskToSave = formData as Task;
-    if (editingTask) {
-      updateTask(taskToSave);
-    } else {
-      if (tasks.some(t => t.id === taskToSave.id)) {
-        alert("Já existe uma tarefa com este ID. Por favor, escolha outro.");
-        return;
+    
+    try {
+      if (editingTask) {
+        await updateTask(taskToSave);
+        setAlertModal({ isOpen: true, message: 'Atividade atualizada com sucesso!', type: 'success', title: 'Sucesso' });
+      } else {
+        // Verifica localmente primeiro para feedback imediato
+        if (tasks.some(t => t.id === taskToSave.id)) {
+          setAlertModal({ isOpen: true, message: 'Já existe uma tarefa com este ID. Por favor, escolha outro.', type: 'error', title: 'ID duplicado' });
+          return;
+        }
+        await addTask(taskToSave);
+        setAlertModal({ isOpen: true, message: 'Nova atividade criada com sucesso!', type: 'success', title: 'Sucesso' });
       }
-      addTask(taskToSave);
+      handleCloseModal();
+    } catch (error) {
+      // Captura erro do Firebase (caso de ID duplicado)
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar tarefa';
+      setAlertModal({ isOpen: true, message: errorMessage, type: 'error', title: 'Erro' });
     }
-    handleCloseModal();
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir esta atividade permanentemente?')) {
-      deleteTask(id);
+    setConfirmModal({ isOpen: true, taskId: id });
+  };
+
+  const confirmDelete = () => {
+    if (confirmModal.taskId) {
+      deleteTask(confirmModal.taskId);
+      setConfirmModal({ isOpen: false });
+      setAlertModal({ isOpen: true, message: 'Atividade excluída com sucesso!', type: 'success', title: 'Excluída' });
     }
   };
 
@@ -424,6 +445,27 @@ const Checklist: React.FC<ChecklistProps> = ({
            </div>
         </div>
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false })}
+        onConfirm={confirmDelete}
+        title="Excluir Atividade"
+        message="Tem certeza que deseja excluir esta atividade permanentemente?"
+        confirmText="Sim, excluir"
+        cancelText="Cancelar"
+        type="danger"
+      />
+
+      {/* Alert Modal */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </div>
   );
 };

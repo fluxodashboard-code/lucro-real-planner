@@ -7,7 +7,9 @@ import {
   doc,
   onSnapshot,
   query,
-  where
+  where,
+  setDoc,
+  getDoc
 } from 'firebase/firestore';
 import { db } from '../src/firebase';
 import { Task } from '../types';
@@ -33,10 +35,9 @@ export const useFirebaseTasks = (userId: string = 'default_user') => {
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const tasksData: Task[] = [];
         snapshot.forEach((doc) => {
-          tasksData.push({
-            id: doc.id,
-            ...doc.data()
-          } as Task);
+          const data = doc.data();
+          // Agora o doc.id é o mesmo que task.id (A-01, B-02, etc)
+          tasksData.push(data as Task);
         });
         setTasks(tasksData);
         setLoading(false);
@@ -55,19 +56,28 @@ export const useFirebaseTasks = (userId: string = 'default_user') => {
   }, [userId]);
 
   // Adicionar tarefa
-  const addTask = useCallback(async (task: Omit<Task, 'id'>) => {
+  const addTask = useCallback(async (task: Task) => {
     try {
-      const docRef = await addDoc(collection(db, 'tasks'), {
+      // Verifica se já existe uma tarefa com este ID
+      const taskRef = doc(db, 'tasks', task.id);
+      const taskDoc = await getDoc(taskRef);
+      
+      if (taskDoc.exists()) {
+        throw new Error('Já existe uma tarefa com este ID. Por favor, escolha outro.');
+      }
+
+      // Usa setDoc com o ID customizado (A-01, B-02, etc)
+      await setDoc(taskRef, {
         ...task,
         userId: userId,
         createdAt: new Date(),
         updatedAt: new Date()
       });
 
-      console.log('Tarefa adicionada com ID:', docRef.id);
+      console.log('Tarefa adicionada com ID:', task.id);
     } catch (err) {
       console.error('Erro ao adicionar tarefa:', err);
-      setError('Erro ao salvar tarefa');
+      setError(err instanceof Error ? err.message : 'Erro ao salvar tarefa');
       throw err;
     }
   }, [userId]);
@@ -75,17 +85,17 @@ export const useFirebaseTasks = (userId: string = 'default_user') => {
   // Atualizar tarefa
   const updateTask = useCallback(async (task: Task) => {
     try {
-      // Separa o ID dos dados
-      const { id, ...data } = task;
+      // Usa o ID customizado (A-01, B-02, etc)
+      const docId = task.id;
 
-      if (!id) throw new Error("ID da tarefa inválido");
+      if (!docId) throw new Error("ID da tarefa inválido");
 
-      await updateDoc(doc(db, 'tasks', id), {
-        ...data,
+      await updateDoc(doc(db, 'tasks', docId), {
+        ...task,
         updatedAt: new Date()
       });
 
-      console.log('Tarefa atualizada:', id);
+      console.log('Tarefa atualizada:', docId);
     } catch (err) {
       console.error('Erro ao atualizar tarefa:', err);
       setError('Erro ao atualizar tarefa');
@@ -94,10 +104,11 @@ export const useFirebaseTasks = (userId: string = 'default_user') => {
   }, []);
 
   // Deletar tarefa
-  const deleteTask = useCallback(async (id: string) => {
+  const deleteTask = useCallback(async (taskId: string) => {
     try {
-      await deleteDoc(doc(db, 'tasks', id));
-      console.log('Tarefa deletada:', id);
+      // Usa o ID customizado diretamente (A-01, B-02, etc)
+      await deleteDoc(doc(db, 'tasks', taskId));
+      console.log('Tarefa deletada:', taskId);
     } catch (err) {
       console.error('Erro ao deletar tarefa:', err);
       setError('Erro ao deletar tarefa');

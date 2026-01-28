@@ -1,5 +1,5 @@
 export interface Task {
-  id: string;
+  id: string; // ID da tarefa (A-01, B-02, etc) - usado também como ID do documento no Firebase
   activity: string;
   responsible: string;
   phase: 'A' | 'B' | 'C' | 'D';

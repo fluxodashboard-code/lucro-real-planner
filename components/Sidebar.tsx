@@ -3,6 +3,7 @@ import { LayoutDashboard, CheckSquare, Layers, FileText, Lightbulb, Menu, Settin
 import { ViewState } from '../types';
 import { useUpdater } from '../hooks/useUpdater';
 import UpdateModal from './UpdateModal';
+import { AlertModal } from './Modal';
 
 interface SidebarProps {
   currentView: ViewState;
@@ -13,6 +14,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isOpen, setIsOpen }) => {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [alertModal, setAlertModal] = useState<{isOpen: boolean, message: string, type: 'success' | 'error' | 'warning' | 'info', title: string}>({ isOpen: false, message: '', type: 'info', title: '' });
   const { currentVersion, isChecking, updateAvailable, updateInfo, checkForUpdates, performUpdate } = useUpdater();
 
   const menuItems: { id: ViewState; label: string; icon: React.ReactNode }[] = [
@@ -34,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isOpen, setIsOp
     if (updateAvailable) {
       setShowUpdateModal(true);
     } else {
-      alert('Você está na versão mais recente!');
+      setAlertModal({ isOpen: true, message: 'Você está na versão mais recente!', type: 'success', title: 'Atualizado' });
     }
   };
 
@@ -143,6 +145,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isOpen, setIsOp
           onClick={() => setIsOpen(false)}
         ></div>
       )}
+
+      {/* Alert Modal */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </>
   );
 };

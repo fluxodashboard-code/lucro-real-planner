@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Task, ProjectSettings } from '../types';
 import { Download, Copy, FileText } from 'lucide-react';
+import { AlertModal } from './Modal';
 
 interface ReportProps {
   tasks: Task[];
@@ -9,6 +10,8 @@ interface ReportProps {
 }
 
 const Report: React.FC<ReportProps> = ({ tasks, settings, responsibles }) => {
+  const [alertModal, setAlertModal] = useState<{isOpen: boolean, message: string, type: 'success' | 'error' | 'warning' | 'info', title: string}>({ isOpen: false, message: '', type: 'info', title: '' });
+  
   const completedCount = tasks.filter(t => t.completed).length;
   const progress = Math.round((completedCount / tasks.length) * 100) || 0;
   
@@ -77,7 +80,7 @@ ${settings.observacoes || 'Sem observações registradas.'}
 
   const handleCopy = () => {
     navigator.clipboard.writeText(markdownContent);
-    alert('Relatório copiado para a área de transferência!');
+    setAlertModal({ isOpen: true, message: 'Relatório copiado para a área de transferência!', type: 'success', title: 'Copiado' });
   };
 
   const handleDownload = () => {
@@ -130,6 +133,15 @@ ${settings.observacoes || 'Sem observações registradas.'}
             ></textarea>
         </div>
       </div>
+
+      {/* Alert Modal */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </div>
   );
 };

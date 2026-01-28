@@ -6,6 +6,7 @@ import Docs from './components/Docs';
 import ProjectSettings from './components/ProjectSettings';
 import Report from './components/Report';
 import AutoUpdateNotification from './components/AutoUpdateNotification';
+import { ConfirmModal, AlertModal } from './components/Modal';
 import { ViewState, Task, ProjectSettings as IProjectSettings } from './types';
 import { INITIAL_RESPONSIBLES } from './constants';
 import { useFirebaseTasks } from './hooks/useFirebaseTasks';
@@ -23,6 +24,10 @@ const DEFAULT_SETTINGS: IProjectSettings = {
 const App: React.FC = () => {
   const [currentView, setView] = useState<ViewState>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Modais de confirmação e alerta
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, action?: 'reset' | 'import', importData?: any}>({ isOpen: false });
+  const [alertModal, setAlertModal] = useState<{isOpen: boolean, message: string, type: 'success' | 'error' | 'warning' | 'info', title: string}>({ isOpen: false, message: '', type: 'info', title: '' });
 
   // Firebase Hooks
   const { tasks, addTask, updateTask, deleteTask, loading: tasksLoading } = useFirebaseTasks('default_user');
@@ -71,12 +76,14 @@ const App: React.FC = () => {
 
   // Settings Handlers
   const handleReset = () => {
-    if (window.confirm('Tem certeza? Isso apagará as configurações locais.')) {
-      localStorage.removeItem(STORAGE_KEY);
-      setResponsibles(INITIAL_RESPONSIBLES);
-      setSettings(DEFAULT_SETTINGS);
-      window.location.reload();
-    }
+    setConfirmModal({ isOpen: true, action: 'reset' });
+  };
+
+  const confirmReset = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setResponsibles(INITIAL_RESPONSIBLES);
+    setSettings(DEFAULT_SETTINGS);
+    window.location.reload();
   };
 
   const handleExport = () => {
@@ -100,24 +107,25 @@ const App: React.FC = () => {
       try {
         const json = JSON.parse(event.target?.result as string);
         if (json.responsibles && json.settings) {
-          if (window.confirm('Isso substituirá suas configurações atuais. Continuar?')) {
-            setResponsibles(json.responsibles);
-            setSettings(json.settings);
-
-            // Note: Importing tasks is more complex with Firebase as we'd need to batch create them
-            // For now, we only import local settings
-            alert('Configurações importadas com sucesso! (Tarefas não são importadas para o banco de dados nesta versão)');
-          }
+          setConfirmModal({ isOpen: true, action: 'import', importData: json });
         } else {
-          alert('Arquivo inválido: Estrutura de dados incorreta.');
+          setAlertModal({ isOpen: true, message: 'Arquivo inválido: Estrutura de dados incorreta.', type: 'error', title: 'Erro ao Importar' });
         }
       } catch (err) {
-        alert('Erro ao ler arquivo JSON.');
+        setAlertModal({ isOpen: true, message: 'Erro ao ler arquivo JSON.', type: 'error', title: 'Erro ao Importar' });
       }
     };
     reader.readAsText(file);
     // Reset input
     e.target.value = '';
+  };
+
+  const confirmImport = () => {
+    if (confirmModal.importData) {
+      setResponsibles(confirmModal.importData.responsibles);
+      setSettings(confirmModal.importData.settings);
+      setAlertModal({ isOpen: true, message: 'Configurações importadas com sucesso! (Tarefas não são importadas para o banco de dados nesta versão)', type: 'success', title: 'Importado' });
+    }
   };
 
   const renderContent = () => {
@@ -188,6 +196,31 @@ const App: React.FC = () => {
 
       {/* Notificação automática de atualização */}
       <AutoUpdateNotification />
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false })}
+        onConfirm={confirmModal.action === 'reset' ? confirmReset : confirmImport}
+        title={confirmModal.action === 'reset' ? 'Resetar Configurações' : 'Importar Configurações'}
+        message={
+          confirmModal.action === 'reset'
+            ? 'Tem certeza? Isso apagará as configurações locais.'
+            : 'Isso substituirá suas configurações atuais. Continuar?'
+        }
+        confirmText="Sim, confirmar"
+        cancelText="Cancelar"
+        type="warning"
+      />
+
+      {/* Alert Modal */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </div>
   );
 };

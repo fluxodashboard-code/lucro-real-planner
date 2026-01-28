@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { ProjectSettings as IProjectSettings, Task } from '../types';
 import { Download, Upload, RotateCcw, Save, Building2, MapPin, FileText, Database, Edit2, Trash2, Check, X } from 'lucide-react';
 import { useFirebaseProjects } from '../hooks/useFirebaseProjects';
+import { ConfirmModal, AlertModal } from './Modal';
 
 interface ProjectSettingsProps {
   settings: IProjectSettings;
@@ -22,6 +23,10 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
   const [projectName, setProjectName] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  
+  // Modais de confirmação e alerta
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, projectId?: string, projectName?: string, action?: 'delete' | 'reset'}>({ isOpen: false });
+  const [alertModal, setAlertModal] = useState<{isOpen: boolean, message: string, type: 'success' | 'error' | 'warning' | 'info', title: string}>({ isOpen: false, message: '', type: 'info', title: '' });
   
   const { projects, loading, saveProject, updateProject, deleteProject } = useFirebaseProjects('default_user');
 
@@ -44,35 +49,35 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
 
   const handleSaveToDatabase = async () => {
     if (!projectName.trim()) {
-      alert('Digite um nome para o projeto!');
+      setAlertModal({ isOpen: true, message: 'Digite um nome para o projeto!', type: 'warning', title: 'Nome obrigatório' });
       return;
     }
 
     if (editingProjectId) {
       const result = await updateProject(editingProjectId, projectName, settings);
       if (result.success) {
-        alert('Projeto atualizado com sucesso!');
+        setAlertModal({ isOpen: true, message: 'Projeto atualizado com sucesso!', type: 'success', title: 'Sucesso' });
         setShowSaveModal(false);
         setProjectName('');
         setEditingProjectId(null);
       } else {
-        alert('Erro ao atualizar projeto. Tente novamente.');
+        setAlertModal({ isOpen: true, message: 'Erro ao atualizar projeto. Tente novamente.', type: 'error', title: 'Erro' });
       }
     } else {
       const result = await saveProject(projectName, settings);
       if (result.success) {
-        alert('Projeto salvo no banco de dados!');
+        setAlertModal({ isOpen: true, message: 'Projeto salvo no banco de dados!', type: 'success', title: 'Sucesso' });
         setShowSaveModal(false);
         setProjectName('');
       } else {
-        alert('Erro ao salvar projeto. Tente novamente.');
+        setAlertModal({ isOpen: true, message: 'Erro ao salvar projeto. Tente novamente.', type: 'error', title: 'Erro' });
       }
     }
   };
 
   const handleLoadProject = (project: any) => {
     setSettings(project.settings);
-    alert(`Projeto "${project.name}" carregado!`);
+    setAlertModal({ isOpen: true, message: `Projeto "${project.name}" carregado!`, type: 'success', title: 'Projeto Carregado' });
   };
 
   const handleEditProject = (project: any) => {
@@ -82,15 +87,29 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
     setShowSaveModal(true);
   };
 
-  const handleDeleteProject = async (projectId: string, projectName: string) => {
-    if (confirm(`Tem certeza que deseja excluir o projeto "${projectName}"?`)) {
-      const result = await deleteProject(projectId);
+  const handleDeleteProject = (projectId: string, projectName: string) => {
+    setConfirmModal({ isOpen: true, projectId, projectName, action: 'delete' });
+  };
+
+  const confirmDeleteProject = async () => {
+    if (confirmModal.projectId) {
+      const result = await deleteProject(confirmModal.projectId);
       if (result.success) {
-        alert('Projeto excluído com sucesso!');
+        setAlertModal({ isOpen: true, message: 'Projeto excluído com sucesso!', type: 'success', title: 'Excluído' });
       } else {
-        alert('Erro ao excluir projeto. Tente novamente.');
+        setAlertModal({ isOpen: true, message: 'Erro ao excluir projeto. Tente novamente.', type: 'error', title: 'Erro' });
       }
+      setConfirmModal({ isOpen: false });
     }
+  };
+
+  const handleResetConfirm = () => {
+    setConfirmModal({ isOpen: true, action: 'reset' });
+  };
+
+  const confirmReset = () => {
+    onReset();
+    setConfirmModal({ isOpen: false });
   };
 
   return (
@@ -293,7 +312,7 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
               <hr className="border-slate-100 my-2" />
 
               <button 
-                onClick={onReset}
+                onClick={handleResetConfirm}
                 className="w-full flex items-center justify-center gap-2 bg-white border border-red-200 hover:bg-red-50 text-red-600 px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 <RotateCcw size={18} />
@@ -380,6 +399,31 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
 
         </div>
       </div>
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false })}
+        onConfirm={confirmModal.action === 'delete' ? confirmDeleteProject : confirmReset}
+        title={confirmModal.action === 'delete' ? 'Excluir Projeto' : 'Resetar Configurações'}
+        message={
+          confirmModal.action === 'delete' 
+            ? `Tem certeza que deseja excluir o projeto "${confirmModal.projectName}"?`
+            : 'Tem certeza? Isso apagará as configurações locais.'
+        }
+        confirmText="Sim, confirmar"
+        cancelText="Cancelar"
+        type="danger"
+      />
+
+      {/* Alert Modal */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </div>
   );
 };
