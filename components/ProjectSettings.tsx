@@ -311,6 +311,14 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
                     <div className="flex justify-between">
                         <span className="text-slate-600">Concluídas</span>
                         <span className="font-medium text-slate-900">{completedCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-slate-600">Responsáveis</span>
+                        <span className="font-medium text-slate-900">{responsibleCount}</span>
+                    </div>
+                </div>
+            </div>
+          </div>
 
           {/* Projetos Salvos */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
@@ -369,14 +377,7 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
               </div>
             )}
           </div>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-slate-600">Responsáveis</span>
-                        <span className="font-medium text-slate-900">{responsibleCount}</span>
-                    </div>
-                </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

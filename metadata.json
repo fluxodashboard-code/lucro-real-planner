@@ -2,5 +2,5 @@
   "name": "Lucro Real Planner",
   "description": "A project management dashboard for implementing the Actual Profit (Lucro Real) tax regime, based on the specific operational plan for Machinery & Services.",
   "requestFramePermissions": [],
-  "version": "0.0.8"
+  "version": "0.0.9"
 }
