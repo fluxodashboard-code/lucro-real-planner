@@ -24,7 +24,8 @@
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "Lucro Real Planner"
+    "shortcutName": "Lucro Real Planner",
+    "differentialPackage": true
   },
   "publish": {
     "provider": "github",

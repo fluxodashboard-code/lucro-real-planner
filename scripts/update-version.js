@@ -2,10 +2,12 @@
 
 /**
  * Script para atualizar versão da aplicação
+ * Sincroniza automaticamente: package.json → version.json → HTML (via vite)
+ * 
  * Uso: node scripts/update-version.js <version> <change1> <change2> ...
  * 
  * Exemplo:
- * node scripts/update-version.js 0.0.2 "Bugfix de login" "Melhor performance"
+ * node scripts/update-version.js 0.0.3 "Nova dashboard" "Performance melhorada"
  */
 
 import fs from 'fs';
@@ -32,14 +34,20 @@ if (!/^\d+\.\d+\.\d+/.test(newVersion)) {
 }
 
 try {
-  // Atualizar package.json
+  console.log('');
+  console.log('╔════════════════════════════════════════════════════════╗');
+  console.log('║          🔄 SINCRONIZANDO VERSÃO - Todas as files     ║');
+  console.log('╚════════════════════════════════════════════════════════╝');
+  console.log('');
+
+  // 1. Atualizar package.json
   const packagePath = path.join(__dirname, '../package.json');
   const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf-8'));
   packageJson.version = newVersion;
   fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2) + '\n');
   console.log(`✅ package.json atualizado para v${newVersion}`);
 
-  // Atualizar version.json (public)
+  // 2. Atualizar version.json (public) - para fallback em runtime
   const versionPath = path.join(__dirname, '../public/version.json');
   const versionJson = {
     version: newVersion,
@@ -47,17 +55,35 @@ try {
     changes: changes.length > 0 ? changes : ['Atualização de versão']
   };
   fs.writeFileSync(versionPath, JSON.stringify(versionJson, null, 2) + '\n');
-  console.log(`✅ version.json atualizado para v${newVersion}`);
+  console.log(`✅ public/version.json atualizado para v${newVersion}`);
 
-  console.log('\n📦 Alterações registradas:');
+  // 3. Verificar se metadata.json existe e atualizar também (para compatibilidade)
+  const metadataPath = path.join(__dirname, '../metadata.json');
+  if (fs.existsSync(metadataPath)) {
+    const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));
+    metadata.version = newVersion;
+    fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2) + '\n');
+    console.log(`✅ metadata.json atualizado para v${newVersion}`);
+  }
+
+  console.log('');
+  console.log('📦 Alterações registradas:');
   versionJson.changes.forEach(change => {
     console.log(`  • ${change}`);
   });
 
-  console.log('\n✨ Versão atualizada com sucesso!');
-  console.log('Execute "npm run build" para gerar a build de produção.');
+  console.log('');
+  console.log('✨ Versão sincronizada com sucesso!');
+  console.log('');
+  console.log('📌 Próximas etapas:');
+  console.log(`   1. npm run build     (Vite injetará v${newVersion} automaticamente no HTML)`);
+  console.log(`   2. npm run build:exe (Electron-builder usará v${newVersion})`);
+  console.log('');
+  console.log('🎯 A versão agora é lida dinamicamente do package.json em runtime!');
+  console.log('');
 
 } catch (error) {
   console.error('❌ Erro ao atualizar versão:', error.message);
   process.exit(1);
 }
+

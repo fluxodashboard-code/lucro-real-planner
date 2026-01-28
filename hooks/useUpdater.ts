@@ -5,14 +5,32 @@ interface UpdateInfo extends UpdateInfoFromGithub {
   downloadUrl?: string;
 }
 
+// Função para obter versão do app meta tag injetada no build
+const getCurrentVersion = (): string => {
+  // Tenta ler do meta tag (injetado no HTML durante o build)
+  const metaTag = document.querySelector('meta[name="app-version"]');
+  if (metaTag?.getAttribute('content')) {
+    return metaTag.getAttribute('content')!;
+  }
+  
+  // Fallback: tenta ler de import.meta.env (disponível em tempo de build com Vite)
+  const envVersion = import.meta.env.VITE_APP_VERSION;
+  if (envVersion) {
+    return envVersion;
+  }
+
+  // Último recurso: versão padrão (não deve ser usado)
+  return '0.0.0';
+};
+
 export const useUpdater = () => {
   const [isChecking, setIsChecking] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Versão atual (mesmo do package.json)
-  const currentVersion = '0.0.2';
+  // Versão atual - lida dinamicamente
+  const currentVersion = getCurrentVersion();
   
   // Configuração do GitHub (você pode usar variáveis de ambiente)
   const GITHUB_OWNER = import.meta.env.VITE_GITHUB_OWNER || 'seu-usuario';
