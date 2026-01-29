@@ -1,12 +1,13 @@
 {
-  "version": "0.1.2",
+  "version": "0.1.3",
   "releaseDate": "2026-01-29",
   "changes": [
-    "✅ Botão de resetar tudo removido para melhor UX",
-    "✅ Interface de configurações simplificada",
-    "✅ Auto-update funcionando corretamente",
+    "✅ Corrigi detecção de atualização que mostrava mensagens conflitantes",
+    "✅ Auto-update agora mostra resultado claro (atualização disponível ou está atualizado)",
+    "✅ Botão de resetar tudo removido",
     "✅ Firebase sincronizando responsáveis em tempo real",
     "🎨 Design moderno e responsivo",
     "🚀 Melhor experiência do usuário"
+  ]
   ]
 }
