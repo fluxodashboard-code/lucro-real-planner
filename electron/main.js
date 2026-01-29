@@ -30,6 +30,7 @@ autoUpdater.on('update-available', (info) => {
 
 autoUpdater.on('update-not-available', (info) => {
   console.log('Você está na versão mais recente:', info.version);
+  mainWindow?.webContents.send('update-not-available', info);
 });
 
 autoUpdater.on('error', (err) => {
@@ -106,13 +107,13 @@ function createWindow() {
     // Verificar atualizações após 3 segundos (dar tempo do app carregar)
     setTimeout(() => {
       console.log('Verificando atualizações...');
-      autoUpdater.checkForUpdatesAndNotify();
+      autoUpdater.checkForUpdates();
     }, 3000);
 
     // Verificar atualizações a cada 10 minutos
     setInterval(() => {
       console.log('Verificando atualizações (intervalo)...');
-      autoUpdater.checkForUpdatesAndNotify();
+      autoUpdater.checkForUpdates();
     }, 10 * 60 * 1000);
   }
 }
@@ -120,7 +121,7 @@ function createWindow() {
 // IPC para verificar atualizações manualmente
 ipcMain.on('check-for-updates', () => {
   if (!isDev) {
-    autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.checkForUpdates();
   }
 });
 

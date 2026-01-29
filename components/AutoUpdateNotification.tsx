@@ -21,6 +21,12 @@ const AutoUpdateNotification: React.FC<AutoUpdateNotificationProps> = ({ onClose
       setUpdateState('downloading');
     });
 
+    // Listener: Sem atualização disponível
+    window.electron.onUpdateNotAvailable?.((info) => {
+      console.log('Nenhuma atualização disponível:', info.version);
+      setUpdateState('none');
+    });
+
     // Listener: Progresso do download
     window.electron.onDownloadProgress((percent) => {
       setDownloadProgress(percent);
@@ -113,6 +119,7 @@ declare global {
       checkForUpdates: () => void;
       installUpdate: () => void;
       onUpdateAvailable: (callback: (info: any) => void) => void;
+      onUpdateNotAvailable?: (callback: (info: any) => void) => void;
       onDownloadProgress: (callback: (percent: number) => void) => void;
       onUpdateDownloaded: (callback: (info: any) => void) => void;
     };
