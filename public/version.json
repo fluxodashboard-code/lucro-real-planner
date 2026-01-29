@@ -1,12 +1,12 @@
 {
-  "version": "0.1.1",
-  "releaseDate": "2026-01-28",
+  "version": "0.1.2",
+  "releaseDate": "2026-01-29",
   "changes": [
-    "✅ Auto-update automático com notificação para reinstalar",
-    "✅ IDs customizados agora são salvos diretamente no Firebase (A-01, B-02, etc)",
-    "✅ Validação de IDs duplicados com feedback visual",
-    "✅ Exclusão de tarefas funcionando perfeitamente no front-end",
-    "🎨 Design moderno com animações suaves em todos os modais",
-    "🚀 Melhorias na experiência do usuário"
+    "✅ Botão de resetar tudo removido para melhor UX",
+    "✅ Interface de configurações simplificada",
+    "✅ Auto-update funcionando corretamente",
+    "✅ Firebase sincronizando responsáveis em tempo real",
+    "🎨 Design moderno e responsivo",
+    "🚀 Melhor experiência do usuário"
   ]
 }
