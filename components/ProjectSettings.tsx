@@ -1,13 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { ProjectSettings as IProjectSettings, Task } from '../types';
-import { Download, Upload, RotateCcw, Save, Building2, MapPin, FileText, Database, Edit2, Trash2, Check, X } from 'lucide-react';
+import { Download, Upload, Save, Building2, MapPin, FileText, Database, Edit2, Trash2, Check, X } from 'lucide-react';
 import { useFirebaseProjects } from '../hooks/useFirebaseProjects';
 import { ConfirmModal, AlertModal } from './Modal';
 
 interface ProjectSettingsProps {
   settings: IProjectSettings;
   setSettings: (settings: IProjectSettings) => void;
-  onReset: () => void;
   onExport: () => void;
   onImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
   taskCount: number;
@@ -16,7 +15,7 @@ interface ProjectSettingsProps {
 }
 
 const ProjectSettings: React.FC<ProjectSettingsProps> = ({ 
-  settings, setSettings, onReset, onExport, onImport,
+  settings, setSettings, onExport, onImport,
   taskCount, completedCount, responsibleCount
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -25,7 +24,7 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   
   // Modais de confirmação e alerta
-  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, projectId?: string, projectName?: string, action?: 'delete' | 'reset'}>({ isOpen: false });
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, projectId?: string, projectName?: string, action?: 'delete'}>({ isOpen: false });
   const [alertModal, setAlertModal] = useState<{isOpen: boolean, message: string, type: 'success' | 'error' | 'warning' | 'info', title: string}>({ isOpen: false, message: '', type: 'info', title: '' });
   
   const { projects, loading, saveProject, updateProject, deleteProject } = useFirebaseProjects('default_user');
@@ -103,14 +102,7 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
     }
   };
 
-  const handleResetConfirm = () => {
-    setConfirmModal({ isOpen: true, action: 'reset' });
-  };
 
-  const confirmReset = () => {
-    onReset();
-    setConfirmModal({ isOpen: false });
-  };
 
   return (
     <div className="space-y-6 animate-fade-in pb-10">
@@ -304,15 +296,7 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
                 className="hidden"
               />
 
-              <hr className="border-slate-100 my-2" />
 
-              <button 
-                onClick={handleResetConfirm}
-                className="w-full flex items-center justify-center gap-2 bg-white border border-red-200 hover:bg-red-50 text-red-600 px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                <RotateCcw size={18} />
-                Resetar tudo
-              </button>
             </div>
 
             <div className="mt-8 bg-slate-50 p-4 rounded-lg border border-slate-100">
@@ -395,17 +379,12 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = ({
         </div>
       </div>
 
-      {/* Confirm Modal */}
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ isOpen: false })}
-        onConfirm={confirmModal.action === 'delete' ? confirmDeleteProject : confirmReset}
-        title={confirmModal.action === 'delete' ? 'Excluir Projeto' : 'Resetar Configurações'}
-        message={
-          confirmModal.action === 'delete' 
-            ? `Tem certeza que deseja excluir o projeto "${confirmModal.projectName}"?`
-            : 'Tem certeza? Isso apagará as configurações locais.'
-        }
+        onConfirm={confirmDeleteProject}
+        title="Excluir Projeto"
+        message={`Tem certeza que deseja excluir o projeto "${confirmModal.projectName}"?`}
         confirmText="Sim, confirmar"
         cancelText="Cancelar"
         type="danger"

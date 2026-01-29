@@ -27,7 +27,7 @@ const App: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Modais de confirmação e alerta
-  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, action?: 'reset' | 'import', importData?: any}>({ isOpen: false });
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, action?: 'import', importData?: any}>({ isOpen: false });
   const [alertModal, setAlertModal] = useState<{isOpen: boolean, message: string, type: 'success' | 'error' | 'warning' | 'info', title: string}>({ isOpen: false, message: '', type: 'info', title: '' });
 
   // Firebase Hooks
@@ -75,17 +75,6 @@ const App: React.FC = () => {
   };
 
   // Settings Handlers
-  const handleReset = () => {
-    setConfirmModal({ isOpen: true, action: 'reset' });
-  };
-
-  const confirmReset = async () => {
-    localStorage.removeItem(STORAGE_KEY);
-    await saveResponsibles(INITIAL_RESPONSIBLES);
-    setSettings(DEFAULT_SETTINGS);
-    window.location.reload();
-  };
-
   const handleExport = () => {
     const dataStr = JSON.stringify({ tasks, responsibles, settings }, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
@@ -158,7 +147,6 @@ const App: React.FC = () => {
           <ProjectSettings
             settings={settings}
             setSettings={setSettings}
-            onReset={handleReset}
             onExport={handleExport}
             onImport={handleImport}
             taskCount={tasks.length}
@@ -201,13 +189,9 @@ const App: React.FC = () => {
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ isOpen: false })}
-        onConfirm={confirmModal.action === 'reset' ? confirmReset : confirmImport}
-        title={confirmModal.action === 'reset' ? 'Resetar Configurações' : 'Importar Configurações'}
-        message={
-          confirmModal.action === 'reset'
-            ? 'Tem certeza? Isso apagará as configurações locais.'
-            : 'Isso substituirá suas configurações atuais. Continuar?'
-        }
+        onConfirm={confirmImport}
+        title="Importar Configurações"
+        message="Isso substituirá suas configurações atuais. Continuar?"
         confirmText="Sim, confirmar"
         cancelText="Cancelar"
         type="warning"
